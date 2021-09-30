@@ -1,5 +1,15 @@
+  
+ <div align="center"> 
+  
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/theilgaz/fastql/blob/master/LICENSE)  [![NuGet](https://img.shields.io/nuget/v/Fastql)](https://www.nuget.org/packages/Fastql/)   [![NuGet](https://img.shields.io/nuget/dt/Fastql)](https://www.nuget.org/packages/Fastql/) 
+
+   
 <img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-logo-resized.png?raw=true" style="width:250px"/><br>
 ***Here comes the query!***
+   
+</div>
+
+
 
 # Overview
 ### What is the ⚡Fastql?
