@@ -7,6 +7,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>fastql-logo.png</PackageIcon>
     <PackageIconUrl />
+    <RepositoryUrl>https://github.com/theilgaz/fastql/tree/main</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/theilgaz/fastql/tree/main</PackageProjectUrl>
+    <Copyright>Abdullah Ilgaz</Copyright>
+    <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
