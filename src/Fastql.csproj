@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Abdullah Ilgaz</Authors>
+    <Description>A small and fast library for building SQL queries from entity classes in a better way than regular string concatenation.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>fastql-logo.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\resource\fastql-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
