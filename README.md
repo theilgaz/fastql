@@ -22,6 +22,7 @@ A small and fast library for building SQL queries from entity classes in a bette
 |1     |&nbsp; **[Get Started](#get-started)**  |
 |1.1   |&nbsp; &nbsp; **[Install Package](#install-package)**  |
 |1.2   |&nbsp; &nbsp; **[Import the namespace](#import-the-namespace)**  |
+|1.3   |&nbsp; &nbsp; **[Sample Code](#sample-code)**  |
 |||
 |2     |**[How to use](#how-to-use)**  |
 |2.1   |&nbsp;&nbsp; **[Prepare your Entity](#prepare-your-entity)**  |
@@ -51,6 +52,9 @@ A small and fast library for building SQL queries from entity classes in a bette
 ```
 using Fastsql;
 ```
+
+### Sample Code
+[Check out](https://github.com/theilgaz/fastql-unit-of-work-in-repository-pattern) the Fastql Sample Project with Unit of Work in Repository Pattern using Dapper.
 
 # How to use
 
@@ -178,5 +182,5 @@ Connection.Execute(
                   transaction: Transaction
 ```                  
                 
-
+                
 <img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-amblem.png?raw=true" style="width:100px"/>
