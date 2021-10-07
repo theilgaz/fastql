@@ -125,9 +125,12 @@ public DateTime CreatedOn { get; set; }
 
 ## APIs
 
-⚡ TableName <br>
-⚡ InsertQuery <br>
-⚡ UpdateQuery <br>
+⚡ TableName 
+⚡ InsertQuery 
+⚡ UpdateQuery 
+⚡ SelectQuery 
+⚡ DeleteQuery 
+
 
 
 # Dapper Example
@@ -149,12 +152,11 @@ Connection.Execute(
 ```
 
 ### Read (Select)
-
-*TableName()* function returns you the **schema** and **table** for ready-to-use in select query.
+*SelectQuery(where)* function returns you the select query based on your where condition.
 
 ```
 Connection.Query<TEntity>(
-                  $"SELECT * FROM {fastql.TableName()} WHERE Id=@Id",
+                  fastql.SelectQuery("Id=@Id"),
                   param: new { Id = id },
                   transaction: Transaction
               );
@@ -171,16 +173,18 @@ Connection.Execute(
                   transaction: Transaction
               );
 ```
+ 
 
 ### Delete
-*TableName()* function can be used for delete operation too. You can handle your where condition with your way. 
+*DeleteQuery(where)* function returns you the delete query based on your where condition.
 
 ```
 Connection.Execute(
-                  $"DELETE FROM {fastql.TableName()} WHERE {where}",
+                  fastql.SelectQuery(where),
                   // param: entity,
                   transaction: Transaction
-```                  
+				  );
+```                
                 
                 
 <img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-amblem.png?raw=true" style="width:100px"/>
