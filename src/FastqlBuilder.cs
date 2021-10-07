@@ -65,5 +65,15 @@ namespace Fastsql
             }
             return qb.UpdateSql;
         }
+
+        public string DeleteQuery(string where)
+        {
+            return $"DELETE FROM {TableName()} WHERE {where}";
+        }
+
+        public string SelectQuery(string where)
+        {
+            return $"SELET * FROM {TableName()} WHERE {where}";
+        }
     }
 }
