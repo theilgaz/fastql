@@ -180,7 +180,7 @@ Connection.Execute(
 
 ```
 Connection.Execute(
-                  fastql.SelectQuery(where),
+                  fastql.DeleteQuery(where),
                   // param: entity,
                   transaction: Transaction
 				  );
