@@ -13,6 +13,7 @@ namespace Fastsql
     public class FastqlBuilder<TEntity>
     {
         private readonly TEntity _entity;
+
         public FastqlBuilder(TEntity entity)
         {
             _entity = entity;
@@ -26,10 +27,11 @@ namespace Fastsql
                 var attribute = type.CustomAttributes.FirstOrDefault();
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
-                    TableAttribute table = (TableAttribute)Attribute.GetCustomAttribute(type, typeof(TableAttribute));
+                    TableAttribute table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
                     return $"[{table.Schema}].[{table.TableName}]";
                 }
             }
+
             return "";
         }
 
@@ -44,11 +46,12 @@ namespace Fastsql
                 }
 
                 if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(_entity));
                 }
             }
+
             return qb.InsertSql;
         }
 
@@ -58,11 +61,12 @@ namespace Fastsql
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
             }
+
             return qb.UpdateSql;
         }
 
@@ -73,7 +77,22 @@ namespace Fastsql
 
         public string SelectQuery(string where)
         {
-            return $"SELET * FROM {TableName()} WHERE {where}";
+            return $"SELECT * FROM {TableName()} WHERE {where}";
+        }
+
+        /// <summary>
+        /// Generates SELECT query with desired columns, where conditions and top records.
+        /// </summary>
+        /// <param name="columns">If its length greater than zero (0), it'll be included. Otherwise all columns will be fetched.</param>
+        /// <param name="where"></param>
+        /// <param name="top">Default 1000 rows will be fetched.</param>
+        /// <returns></returns>
+        public string SelectQuery(string[] columns, string where, int top = 1000)
+        {
+            string s = string.Format("[{0}]", string.Join("],[", columns.Select(i => i.Replace("[", ""))));
+            return columns is {Length: > 0}
+                ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {TableName()} WHERE {@where}"
+                : $"SELECT TOP({top}) * FROM {TableName()} WHERE {@where}";
         }
     }
 }
