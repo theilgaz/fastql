@@ -58,20 +58,28 @@ using Fastsql;
 
 # How to use
 
-Define a FastqlBuilder variable in your database related class. *TEntity* should be your poco to generate Insert and Update queries.
+Fastql can be used with two way: using **object** and using **helper** class.
+
+## 1. Using FastqlBuilder Way
+
+Define a FastqlBuilder variable in your database related class. *TEntity* should be your poco to generate CRUD queries.
 
 ⚡ This class fits perfect to Repository Pattern with Dapper Micro ORM.
 
 ```
-   private FastqlBuilder<TEntity> fastql;
+   private FastqlBuilder<TEntity> fastql = new FastqlBuilder<TEntity>();
 ```
 
-Constructor needs an object to handle attributes of the demanded class at runtime. If you don't have any at design time, you can initialize your fastql like this:
+## 2. Using FastqlHelper Way
+
+Call FastqlHelper with your *TEntity*. *TEntity* should be your poco to generate CRUD queries.
+
+⚡ This class fits perfect to Repository Pattern with Dapper Micro ORM.
 
 ```
-fastql = new FastqlBuilder<TEntity>((TEntity)Activator.CreateInstance(typeof(TEntity)));
+   FastqlHelper<TEntity>.InsertQuery(); // insert query for TEntity
 ```
-(*Activator is in namespace System in assembly System.Runtime.dll*)
+
 
 ## Prepare Your Entity
 
@@ -152,6 +160,8 @@ Connection.Execute(
 ```
 
 ### Read (Select)
+
+#### SelectQuery(where)
 *SelectQuery(where)* function returns you the select query based on your where condition.
 
 ```
@@ -161,6 +171,27 @@ Connection.Query<TEntity>(
                   transaction: Transaction
               );
 ```
+
+#### SelectQuery(columns,where,top)
+
+*SelectQuery(columns,where,top)* function returns you the select query based on desired columns, where conditions and top records.
+```
+Connection.Query<TEntity>(
+                  fastql.SelectQuery(new string[] {"Field1","Field2","Field3"},"Id=@Id"),
+                  param: new { Id = id },
+                  transaction: Transaction
+              );
+```
+**Sample output**: Select TOP(1000) [Field1],[Field2],[Field3] from [TableName] where Id=@Id
+
+```
+Connection.Query<TEntity>(
+                  fastql.SelectQuery(new string[] {"Field1","Field2","Field3"},"Id=@Id",500),
+                  param: new { Id = id },
+                  transaction: Transaction
+              );
+```
+**Sample output**: Select TOP(500) [Field1],[Field2],[Field3] from [TableName] where Id=@Id
 
 ### Update
 
@@ -183,8 +214,6 @@ Connection.Execute(
                   fastql.DeleteQuery(where),
                   // param: entity,
                   transaction: Transaction
-				  );
+              );
 ```                
                 
-                
-<img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-amblem.png?raw=true" style="width:100px"/>
