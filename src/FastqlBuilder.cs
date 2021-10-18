@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Fastsql
+namespace Fastql
 {
     /// <summary>
     /// A small and fast library for building SQL queries from entity classes
@@ -14,9 +14,9 @@ namespace Fastsql
     {
         private readonly TEntity _entity;
 
-        public FastqlBuilder(TEntity entity)
+        public FastqlBuilder()
         {
-            _entity = entity;
+            _entity = (TEntity)Activator.CreateInstance(typeof(TEntity));
         }
 
         public string TableName()
@@ -27,11 +27,10 @@ namespace Fastsql
                 var attribute = type.CustomAttributes.FirstOrDefault();
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
-                    TableAttribute table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
+                    TableAttribute table = (TableAttribute)Attribute.GetCustomAttribute(type, typeof(TableAttribute));
                     return $"[{table.Schema}].[{table.TableName}]";
                 }
             }
-
             return "";
         }
 
@@ -72,12 +71,12 @@ namespace Fastsql
 
         public string DeleteQuery(string where)
         {
-            return $"DELETE FROM {TableName()} WHERE {where}";
+            return $"DELETE FROM {TableName()} WHERE {where};";
         }
 
         public string SelectQuery(string where)
         {
-            return $"SELECT * FROM {TableName()} WHERE {where}";
+            return $"SELECT * FROM {TableName()} WHERE {where};";
         }
 
         /// <summary>
@@ -90,9 +89,9 @@ namespace Fastsql
         public string SelectQuery(string[] columns, string where, int top = 1000)
         {
             string s = string.Format("[{0}]", string.Join("],[", columns.Select(i => i.Replace("[", ""))));
-            return columns is {Length: > 0}
-                ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {TableName()} WHERE {@where}"
-                : $"SELECT TOP({top}) * FROM {TableName()} WHERE {@where}";
+            return columns is { Length: > 0 }
+                ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {TableName()} WHERE {@where};"
+                : $"SELECT TOP({top}) * FROM {TableName()} WHERE {@where};";
         }
     }
 }

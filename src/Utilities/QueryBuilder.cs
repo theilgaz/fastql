@@ -48,12 +48,7 @@ namespace Fastql.Utilities
 
                 var fields = string.Join(", ", _params.Keys);
                 var values = string.Join(", @", _params.Keys);
-                return "DECLARE @output table(ID bigint); " +
-                        $"INSERT INTO {_table}({fields}) " +
-                        $"OUTPUT INSERTED.[{_identityColumn}] " +
-                        "INTO @output " +
-                        $"VALUES(@{values}) " +
-                        "SELECT * FROM @output;";
+                return $"INSERT INTO {_table}({fields}) VALUES(@{values});";
             }
         }
 
