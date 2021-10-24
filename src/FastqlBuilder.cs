@@ -16,7 +16,7 @@ namespace Fastql
 
         public FastqlBuilder()
         {
-            _entity = (TEntity)Activator.CreateInstance(typeof(TEntity));
+            _entity = (TEntity) Activator.CreateInstance(typeof(TEntity));
         }
 
         public string TableName()
@@ -27,14 +27,15 @@ namespace Fastql
                 var attribute = type.CustomAttributes.FirstOrDefault();
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
-                    TableAttribute table = (TableAttribute)Attribute.GetCustomAttribute(type, typeof(TableAttribute));
+                    TableAttribute table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
                     return $"[{table.Schema}].[{table.TableName}]";
                 }
             }
+
             return "";
         }
 
-        public string InsertQuery()
+        public string InsertQuery(bool returnIdentity = false)
         {
             QueryBuilder qb = new QueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -51,7 +52,7 @@ namespace Fastql
                 }
             }
 
-            return qb.InsertSql;
+            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public string UpdateQuery(TEntity entity, string where)
@@ -89,7 +90,7 @@ namespace Fastql
         public string SelectQuery(string[] columns, string where, int top = 1000)
         {
             string s = string.Format("[{0}]", string.Join("],[", columns.Select(i => i.Replace("[", ""))));
-            return columns is { Length: > 0 }
+            return columns is {Length: > 0}
                 ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {TableName()} WHERE {@where};"
                 : $"SELECT TOP({top}) * FROM {TableName()} WHERE {@where};";
         }
