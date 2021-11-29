@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
     <Authors>Abdullah Ilgaz</Authors>
     <Description>A small and fast library for building SQL queries from entity classes in a better way than regular string concatenation.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -14,9 +13,10 @@
     <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>1.1.0</Version>
-    <PackageVersion>1.1.1</PackageVersion>
+    <PackageVersion>1.1.2</PackageVersion>
     <AssemblyVersion>1.1.1</AssemblyVersion>
     <FileVersion>1.1.1</FileVersion>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
