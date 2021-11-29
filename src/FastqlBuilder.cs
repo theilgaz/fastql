@@ -22,7 +22,7 @@ namespace Fastql
         public string TableName()
         {
             var type = _entity.GetType();
-            if (type.CustomAttributes.Count() > 0)
+            if (type.CustomAttributes.Any())
             {
                 var attribute = type.CustomAttributes.FirstOrDefault();
                 if (attribute.AttributeType.Name == "TableAttribute")
@@ -54,6 +54,26 @@ namespace Fastql
 
             return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
+        
+        public string InsertStatement(bool returnIdentity = false)
+        {
+            QueryBuilder qb = new QueryBuilder(TableName());
+            foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
+                {
+                    qb.AddIdentityColumn(propertyInfo.Name);
+                }
+
+                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                {
+                    qb.Add(propertyInfo.Name,$":{propertyInfo.Name}");
+                }
+            }
+
+            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+        }
 
         public string UpdateQuery(TEntity entity, string where)
         {
@@ -64,6 +84,21 @@ namespace Fastql
                     (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
+                }
+            }
+
+            return qb.UpdateSql;
+        }
+        
+        public string UpdateStatement(TEntity entity, string where)
+        {
+            QueryBuilder qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                {
+                    qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
             }
 
