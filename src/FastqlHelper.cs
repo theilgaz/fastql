@@ -11,7 +11,7 @@ namespace Fastql
         static string TableName()
         {
             var type = Activator.CreateInstance(typeof(TEntity)).GetType();
-            if (type.CustomAttributes.Count() > 0)
+            if (type.CustomAttributes.Any())
             {
                 var attribute = type.CustomAttributes.FirstOrDefault();
                 if (attribute.AttributeType.Name == "TableAttribute")
@@ -23,7 +23,7 @@ namespace Fastql
             return "";
         }
 
-        public static string InsertQuery()
+        public static string InsertQuery(bool returnIdentity = false)
         {
             var instance = (TEntity)Activator.CreateInstance(typeof(TEntity));
             var qb = new QueryBuilder(TableName());
@@ -41,9 +41,30 @@ namespace Fastql
                 }
             }
 
-            return qb.InsertSql;
+            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
+        public static string InsertStatement(bool returnIdentity = false)
+        {
+            var instance = (TEntity)Activator.CreateInstance(typeof(TEntity));
+            var qb = new QueryBuilder(TableName());
+            foreach (var propertyInfo in instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
+                {
+                    qb.AddIdentityColumn(propertyInfo.Name);
+                }
+
+                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                {
+                    qb.Add(propertyInfo.Name,$":{propertyInfo.Name}");
+                }
+            }
+
+            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+        }
+        
         public static string SelectQuery(string where)
         {
             return $"SELECT * FROM {TableName()} WHERE {where};";
@@ -66,6 +87,21 @@ namespace Fastql
                     (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
+                }
+            }
+
+            return qb.UpdateSql;
+        }
+        
+        public static string UpdateStatement(TEntity entity, string where)
+        {
+            var qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
+                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                {
+                    qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
             }
 
