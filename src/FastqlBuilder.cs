@@ -24,7 +24,7 @@ namespace Fastql
             var type = _entity.GetType();
             if (type.CustomAttributes.Any())
             {
-                var attribute = type.CustomAttributes.FirstOrDefault();
+                var attribute = type.CustomAttributes.FirstOrDefault(x=>x.AttributeType == typeof(TableAttribute));
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
                     TableAttribute table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
