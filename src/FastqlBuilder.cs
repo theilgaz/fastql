@@ -27,7 +27,7 @@ namespace Fastql
                 var attribute = type.CustomAttributes.FirstOrDefault(x=>x.AttributeType == typeof(TableAttribute));
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
-                    TableAttribute table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
+                    var table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
                     return $"[{table.Schema}].[{table.TableName}]";
                 }
             }
@@ -37,7 +37,7 @@ namespace Fastql
 
         public string InsertQuery(bool returnIdentity = false)
         {
-            QueryBuilder qb = new QueryBuilder(TableName());
+            var qb = new QueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
@@ -45,19 +45,21 @@ namespace Fastql
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                    
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(_entity));
                 }
             }
 
-            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
         
         public string InsertStatement(bool returnIdentity = false)
         {
-            QueryBuilder qb = new QueryBuilder(TableName());
+            var qb = new QueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
@@ -65,23 +67,25 @@ namespace Fastql
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name,$":{propertyInfo.Name}");
                 }
             }
 
-            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public string UpdateQuery(TEntity entity, string where)
         {
-            QueryBuilder qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
@@ -92,11 +96,12 @@ namespace Fastql
         
         public string UpdateStatement(TEntity entity, string where)
         {
-            QueryBuilder qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
@@ -124,7 +129,7 @@ namespace Fastql
         /// <returns></returns>
         public string SelectQuery(string[] columns, string where, int top = 1000)
         {
-            string s = string.Format("[{0}]", string.Join("],[", columns.Select(i => i.Replace("[", ""))));
+            var s = $"[{string.Join("],[", columns.Select(i => i.Replace("[", "")))}]";
             return columns is {Length: > 0}
                 ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {TableName()} WHERE {@where};"
                 : $"SELECT TOP({top}) * FROM {TableName()} WHERE {@where};";

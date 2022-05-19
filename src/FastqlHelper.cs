@@ -16,7 +16,7 @@ namespace Fastql
                 var attribute = type.CustomAttributes.FirstOrDefault(x=>x.AttributeType == typeof(TableAttribute));
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
-                    TableAttribute table = (TableAttribute)Attribute.GetCustomAttribute(type, typeof(TableAttribute));
+                    var table = (TableAttribute)Attribute.GetCustomAttribute(type, typeof(TableAttribute));
                     return $"[{table.Schema}].[{table.TableName}]";
                 }
             }
@@ -34,14 +34,15 @@ namespace Fastql
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(instance));
                 }
             }
 
-            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public static string InsertStatement(bool returnIdentity = false)
@@ -55,19 +56,20 @@ namespace Fastql
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name,$":{propertyInfo.Name}");
                 }
             }
 
-            return (returnIdentity) ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
         
         public static string SelectQuery(string where)
         {
-            return $"SELECT * FROM {TableName()} WHERE {where};";
+            return $"SELECT * FROM {TableName()} WHERE {@where};";
         }
 
         public static string SelectQuery(string[] columns, string where, int top = 1000)
@@ -83,8 +85,9 @@ namespace Fastql
             var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
@@ -98,8 +101,9 @@ namespace Fastql
             var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if ((!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute))) &&
-                    (!Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute))))
+                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
+                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
                 {
                     qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
