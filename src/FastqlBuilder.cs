@@ -13,12 +13,19 @@ namespace Fastql
     public class FastqlBuilder<TEntity>
     {
         private readonly TEntity _entity;
+        private readonly DatabaseType _databaseType = DatabaseType.SqlServer;
 
         public FastqlBuilder()
         {
             _entity = (TEntity) Activator.CreateInstance(typeof(TEntity));
         }
 
+        public FastqlBuilder(DatabaseType databaseType)
+        {
+            _entity = (TEntity) Activator.CreateInstance(typeof(TEntity));
+            _databaseType = databaseType;
+        }
+        
         public string TableName()
         {
             var type = _entity.GetType();
@@ -28,7 +35,12 @@ namespace Fastql
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
                     var table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
-                    return $"[{table.Schema}].[{table.TableName}]";
+                    return table.TableOutputName switch
+                    {
+                        TableOutputName.OnlyTable => table.TableName,
+                        TableOutputName.TableAndSchema => table.Schema + "." + table.TableName,
+                        _ => $"[{table.Schema}].[{table.TableName}]"
+                    };
                 }
             }
 
@@ -40,21 +52,37 @@ namespace Fastql
             var qb = new QueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
+                {
+                    continue;
+                }
                 {
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
-                    
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+                {
+                    var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    qb.Add(field.FieldName, propertyInfo.GetValue(_entity));
+                }
+                else
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(_entity));
                 }
             }
 
+            if (_databaseType == DatabaseType.Postgres)
+            {
+                return returnIdentity? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+            }
+            
             return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            
         }
         
         public string InsertStatement(bool returnIdentity = false)
@@ -62,20 +90,34 @@ namespace Fastql
             var qb = new QueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
                 {
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
-                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
-                    qb.Add(propertyInfo.Name,$":{propertyInfo.Name}");
+                    var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    qb.Add(field.FieldName, $":{propertyInfo.Name}");
+                }
+                else
+                {
+                    qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
             }
 
+            if (_databaseType == DatabaseType.Postgres)
+            {
+                return returnIdentity? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+            }
+            
             return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+
         }
 
         public string UpdateQuery(TEntity entity, string where)
@@ -83,9 +125,17 @@ namespace Fastql
             var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+                {
+                    var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    qb.Add(field.FieldName, propertyInfo.GetValue(entity));
+                }
+                else
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
@@ -99,9 +149,17 @@ namespace Fastql
             var qb = new QueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (!Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) &&
-                    !Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+                {
+                    var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    qb.Add(field.FieldName, $":{propertyInfo.Name}");
+                }
+                else
                 {
                     qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
                 }
