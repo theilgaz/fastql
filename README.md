@@ -30,6 +30,7 @@ A small and fast library for building SQL queries from entity classes in a bette
 |2.1.2 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsPrimaryKey Attribute](#isprimarykey-attribute)**  |
 |2.1.3 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotInsertable Attribute](#isnotinsertable-attribute)**  |
 |2.1.4 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotUpdatable Attribute](#isnotupdatable-attribute)**  |
+|2.1.4 |&nbsp; &nbsp; &nbsp; &nbsp; **[Field Attribute](#field-attribute)**  |
 |2.2   |&nbsp;&nbsp; **[APIs](#apis)**  |
 |||
 |3     |**[Dapper Example](#dapper-example)**  |
@@ -83,7 +84,7 @@ Call FastqlHelper with your *TEntity*. *TEntity* should be your poco to generate
 
 ## Prepare Your Entity
 
-Fastql has 4 attributes to handle your queries.
+Fastql has 5 attributes to handle your queries.
 
 ### Table Attribute
 
@@ -130,6 +131,15 @@ Fields have this attribute won't be placed in your Update query.
 public DateTime CreatedOn { get; set; }
 ```
 
+### Field Attribute
+
+Fields have this attribute will be replaced in your Insert and Update query.
+*You can define CreatedAt field on your code and your field attribute can contain the original version of database property like created_at.*
+
+```
+[Field("created_at")]
+public DateTime CreatedAt { get; set; }
+```
 
 ## APIs
 
