@@ -35,10 +35,10 @@ namespace Fastql
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
                     var table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
-                    return table.TableOutputName switch
+                    return table.Output switch
                     {
-                        TableOutputName.OnlyTable => table.TableName,
-                        TableOutputName.TableAndSchema => table.Schema + "." + table.TableName,
+                        OutputName.OnlyTable => table.TableName,
+                        OutputName.TableAndSchema => table.Schema + "." + table.TableName,
                         _ => $"[{table.Schema}].[{table.TableName}]"
                     };
                 }
