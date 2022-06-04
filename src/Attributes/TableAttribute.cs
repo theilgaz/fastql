@@ -7,18 +7,18 @@ namespace Fastql.Attributes
         public string TableName { get; set; }
         public string Schema { get; set; } = "dbo";
 
-        public TableOutputName TableOutputName { get; set; } = TableOutputName.Default;
+        public OutputName Output { get; set; } = OutputName.Default;
         
-        public TableAttribute(string table, string schema = "dbo", TableOutputName tableOutputName = TableOutputName.Default)
+        public TableAttribute(string table, string schema = "dbo", OutputName output = OutputName.Default)
         {
             TableName = table;
             Schema = schema;
-            TableOutputName = tableOutputName;
+            Output = output;
         }
 
     }
     
-    public enum TableOutputName
+    public enum OutputName
     {
         Default,
         TableAndSchema,
