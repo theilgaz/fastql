@@ -49,14 +49,11 @@ namespace Fastql
 
         public string InsertQuery(bool returnIdentity = false)
         {
-            var qb = new QueryBuilder(TableName());
+            var qb = new FastQueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
-                {
-                    continue;
-                }
-                {
+                { 
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
@@ -68,11 +65,11 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, propertyInfo.GetValue(_entity));
+                    qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(_entity));
                 }
                 else
                 {
-                    qb.Add(propertyInfo.Name, propertyInfo.GetValue(_entity));
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(_entity));
                 }
             }
 
@@ -87,7 +84,7 @@ namespace Fastql
         
         public string InsertStatement(bool returnIdentity = false)
         {
-            var qb = new QueryBuilder(TableName());
+            var qb = new FastQueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
@@ -103,11 +100,11 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, $":{propertyInfo.Name}");
+                    qb.Add(field.FieldName, propertyInfo.Name, $":{propertyInfo.Name}");
                 }
                 else
                 {
-                    qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, $":{propertyInfo.Name}");
                 }
             }
 
@@ -122,7 +119,7 @@ namespace Fastql
 
         public string UpdateQuery(TEntity entity, string where)
         {
-            var qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            var qb = new FastQueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
@@ -133,11 +130,11 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, propertyInfo.GetValue(entity));
+                    qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
                 else
                 {
-                    qb.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(entity));
                 }
             }
 
@@ -146,7 +143,7 @@ namespace Fastql
         
         public string UpdateStatement(TEntity entity, string where)
         {
-            var qb = new QueryBuilder(TableName(), $" WHERE {where}");
+            var qb = new FastQueryBuilder(TableName(), $" WHERE {where}");
             foreach (var propertyInfo in entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
@@ -157,11 +154,11 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, $":{propertyInfo.Name}");
+                    qb.Add(field.FieldName, propertyInfo.Name, $":{propertyInfo.Name}");
                 }
                 else
                 {
-                    qb.Add(propertyInfo.Name, $":{propertyInfo.Name}");
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, $":{propertyInfo.Name}");
                 }
             }
 
