@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fastql.Attributes
+namespace Fastql
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class IsPrimaryKeyAttribute : Attribute
