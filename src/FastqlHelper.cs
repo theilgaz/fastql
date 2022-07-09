@@ -49,6 +49,55 @@ namespace Fastql
             return "";
         }
 
+        public static string InsertReturnObjectQuery()
+	{
+		TEntity val = (TEntity)Activator.CreateInstance(typeof(TEntity));
+		FastQueryBuilder qb = new FastQueryBuilder(TableName());
+		PropertyInfo[] properties = val.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+		foreach (PropertyInfo propertyInfo in properties)
+		{
+			if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
+			{
+				qb.AddIdentityColumn(propertyInfo.Name);
+			}
+			if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) || Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) || Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+			{
+				continue;
+			}
+			if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+			{
+				FieldAttribute field = (FieldAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+				switch (field.FieldType)
+				{
+				case FieldType.Jsonb:
+					qb.Add(field.FieldName, propertyInfo.Name + "::jsonb", propertyInfo.GetValue(val));
+					break;
+				case FieldType.Timestamp:
+					qb.Add(field.FieldName, propertyInfo.Name + "::timestamp", propertyInfo.GetValue(val));
+					break;
+				case FieldType.Time:
+					qb.Add(field.FieldName, propertyInfo.Name + "::time", propertyInfo.GetValue(val));
+					break;
+				case FieldType.Date:
+					qb.Add(field.FieldName, propertyInfo.Name + "::date", propertyInfo.GetValue(val));
+					break;
+				default:
+					qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(val));
+					break;
+				}
+			}
+			else
+			{
+				qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(val));
+			}
+		}
+		if (_databaseType == DatabaseType.Postgres)
+		{
+			return qb.InsertSql + $"RETURNING {qb.ReturnStatement}; ";
+		}
+		return qb.InsertReturnObjectSql;
+	}
+        
         public static string InsertQuery(bool returnIdentity = false)
         {
             var instance = (TEntity)Activator.CreateInstance(typeof(TEntity));
@@ -68,7 +117,24 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(instance));
+                    switch (field.FieldType)
+                    {
+                        case FieldType.Jsonb:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::jsonb", propertyInfo.GetValue(instance));
+                            break;
+                        case FieldType.Timestamp:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::timestamp", propertyInfo.GetValue(instance));
+                            break;
+                        case FieldType.Time:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::time", propertyInfo.GetValue(instance));
+                            break;
+                        case FieldType.Date:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::date", propertyInfo.GetValue(instance));
+                            break;
+                        default:
+                            qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(instance));
+                            break;
+                    }                
                 }
                 else
                 {
@@ -147,8 +213,24 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-                    qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(entity));
-                }
+                    switch (field.FieldType)
+                    {
+                        case FieldType.Jsonb:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::jsonb", propertyInfo.GetValue(entity));
+                            break;
+                        case FieldType.Timestamp:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::timestamp", propertyInfo.GetValue(entity));
+                            break;
+                        case FieldType.Time:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::time", propertyInfo.GetValue(entity));
+                            break;
+                        case FieldType.Date:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::date", propertyInfo.GetValue(entity));
+                            break;
+                        default:
+                            qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(entity));
+                            break;
+                    }                 }
                 else
                 {
                     qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(entity));
