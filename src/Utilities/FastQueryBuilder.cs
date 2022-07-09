@@ -38,7 +38,7 @@ namespace Fastql.Utilities
         public void AddCondition(string parameterName, string name, object value)
         {
             var obj = new QueryBuilderObject(parameterName, name, value);
-            
+
             if (_objects.Contains(obj))
                 throw new DuplicateNameException("This field was already declared");
         }
@@ -55,7 +55,7 @@ namespace Fastql.Utilities
                 return $"INSERT INTO {_table}({fields}) VALUES(@{values}) ";
             }
         }
-        
+
         public string InsertReturnObjectSql
         {
             get
@@ -115,21 +115,17 @@ namespace Fastql.Utilities
             {
                 var sb = new StringBuilder();
                 foreach (var obj in _objects)
-                { 
+                {
                     sb.Append($"{obj.Key} as {obj.Name.Substring(0, obj.Name.IndexOf(':'))}, ");
                 }
 
                 return sb.ToString().Substring(0, sb.Length - 2);
             }
         }
-        
+
         public string TableName
         {
-            get
-            {
-                return _table;
-            }
+            get { return _table; }
         }
-
     }
 }

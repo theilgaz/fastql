@@ -74,11 +74,7 @@ namespace Fastql.Utilities
 
         public string TableName
         {
-            get
-            {
-                return _table;
-            }
+            get { return _table; }
         }
-
     }
 }
