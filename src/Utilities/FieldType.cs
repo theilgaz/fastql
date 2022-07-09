@@ -15,5 +15,4 @@ namespace Fastql.Utilities
         Date,
         Time
     }
-
 }

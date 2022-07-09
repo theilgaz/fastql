@@ -25,13 +25,13 @@ namespace Fastql
             _entity = (TEntity) Activator.CreateInstance(typeof(TEntity));
             _databaseType = databaseType;
         }
-        
+
         public string TableName()
         {
             var type = _entity.GetType();
             if (type.CustomAttributes.Any())
             {
-                var attribute = type.CustomAttributes.FirstOrDefault(x=>x.AttributeType == typeof(TableAttribute));
+                var attribute = type.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(TableAttribute));
                 if (attribute.AttributeType.Name == "TableAttribute")
                 {
                     var table = (TableAttribute) Attribute.GetCustomAttribute(type, typeof(TableAttribute));
@@ -47,62 +47,72 @@ namespace Fastql
             return "";
         }
 
-        	public string InsertReturnObjectQuery()
-	{
-		FastQueryBuilder qb = new FastQueryBuilder(TableName());
-		TEntity entity = _entity;
-		PropertyInfo[] properties = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-		foreach (PropertyInfo propertyInfo in properties)
-		{
-			if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
-			{
-				qb.AddIdentityColumn(propertyInfo.Name);
-			}
-			if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) || Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) || Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
-			{
-				continue;
-			}
-			if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
-			{
-				FieldAttribute field = (FieldAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
-				switch (field.FieldType)
-				{
-				case FieldType.Jsonb:
-					qb.Add(field.FieldName, propertyInfo.Name + "::jsonb", propertyInfo.GetValue(_entity));
-					break;
-				case FieldType.Timestamp:
-					qb.Add(field.FieldName, propertyInfo.Name + "::timestamp", propertyInfo.GetValue(_entity));
-					break;
-				case FieldType.Time:
-					qb.Add(field.FieldName, propertyInfo.Name + "::time", propertyInfo.GetValue(_entity));
-					break;
-				case FieldType.Date:
-					qb.Add(field.FieldName, propertyInfo.Name + "::date", propertyInfo.GetValue(_entity));
-					break;
-				default:
-					qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(_entity));
-					break;
-				}
-			}
-			else
-			{
-				qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(_entity));
-			}
-		}
-		if (_databaseType == DatabaseType.Postgres)
-		{
-			return qb.InsertSql + $"RETURNING {qb.ReturnStatement}; ";
-		}
-		return qb.InsertReturnObjectSql;
-	}
-            
+        public string InsertReturnObjectQuery()
+        {
+            FastQueryBuilder qb = new FastQueryBuilder(TableName());
+            TEntity entity = _entity;
+            PropertyInfo[] properties = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            foreach (PropertyInfo propertyInfo in properties)
+            {
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
+                {
+                    qb.AddIdentityColumn(propertyInfo.Name);
+                }
+
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                {
+                    continue;
+                }
+
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+                {
+                    FieldAttribute field =
+                        (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    switch (field.FieldType)
+                    {
+                        case FieldType.Jsonb:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::jsonb", propertyInfo.GetValue(_entity));
+                            break;
+                        case FieldType.Timestamp:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::timestamp", propertyInfo.GetValue(_entity));
+                            break;
+                        case FieldType.Time:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::time", propertyInfo.GetValue(_entity));
+                            break;
+                        case FieldType.Date:
+                            qb.Add(field.FieldName, propertyInfo.Name + "::date", propertyInfo.GetValue(_entity));
+                            break;
+                        default:
+                            qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(_entity));
+                            break;
+                    }
+                }
+                else
+                {
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, propertyInfo.GetValue(_entity));
+                }
+            }
+
+            if (_databaseType == DatabaseType.Postgres)
+            {
+                return qb.InsertSql + $"RETURNING {qb.ReturnStatement}; ";
+            }
+
+            return qb.InsertReturnObjectSql;
+        }
+
         public string InsertQuery(bool returnIdentity = false)
         {
             var qb = new FastQueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
-                { 
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
+                {
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
 
@@ -110,7 +120,7 @@ namespace Fastql
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
-                
+
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
@@ -141,19 +151,19 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
             }
-            
+
             return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
-            
         }
-        
+
         public string InsertStatement(bool returnIdentity = false)
         {
             var qb = new FastQueryBuilder(TableName());
             foreach (var propertyInfo in _entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) || Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
+                if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(PKAttribute)))
                 {
                     qb.AddIdentityColumn(propertyInfo.Name);
                 }
@@ -162,7 +172,7 @@ namespace Fastql
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
-                
+
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
@@ -176,11 +186,10 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
             }
-            
-            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
 
+            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public string UpdateQuery(TEntity entity, string where)
@@ -192,7 +201,7 @@ namespace Fastql
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
-                
+
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
@@ -213,7 +222,7 @@ namespace Fastql
                         default:
                             qb.Add(field.FieldName, propertyInfo.Name, propertyInfo.GetValue(entity));
                             break;
-                    }                
+                    }
                 }
                 else
                 {
@@ -223,7 +232,7 @@ namespace Fastql
 
             return qb.UpdateSql;
         }
-        
+
         public string UpdateStatement(TEntity entity, string where)
         {
             var qb = new FastQueryBuilder(TableName(), $" WHERE {where}");
@@ -233,7 +242,7 @@ namespace Fastql
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
-                
+
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     var field = (FieldAttribute) Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));

@@ -21,5 +21,4 @@ namespace Fastql.Attributes
             FieldType = fieldType;
         }
     }
-
 }

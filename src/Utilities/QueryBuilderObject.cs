@@ -8,9 +8,8 @@ namespace Fastql.Utilities
 
         public QueryBuilderObject()
         {
-            
         }
-        
+
         public QueryBuilderObject(string key, string name, object value)
         {
             Key = key;
