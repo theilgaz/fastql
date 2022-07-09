@@ -52,7 +52,20 @@ namespace Fastql.Utilities
 
                 var fields = string.Join(", ", _objects.Select(x => x.Key));
                 var values = string.Join(", @", _objects.Select(x => x.Name));
-                return $"INSERT INTO {_table}({fields}) VALUES(@{values});";
+                return $"INSERT INTO {_table}({fields}) VALUES(@{values}) ";
+            }
+        }
+        
+        public string InsertReturnObjectSql
+        {
+            get
+            {
+                if (_objects.Count == 0)
+                    throw new Exception("Input parameters not provided.");
+
+                var fields = string.Join(", ", _objects.Select(x => x.Key));
+                var values = string.Join(", @", _objects.Select(x => x.Name));
+                return $"INSERT INTO {_table}({fields}) OUTPUT inserted . * VALUES(@{values});";
             }
         }
 
@@ -76,6 +89,40 @@ namespace Fastql.Utilities
             }
         }
 
+        public string SelectSql
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_where))
+                    throw new Exception("Where clause not provided.");
+
+                if (_objects.Count == 0)
+                    throw new Exception("Input parameters not provided.");
+
+                var sb = new StringBuilder();
+                foreach (var obj in _objects)
+                {
+                    sb.Append($"{obj.Key} as {obj.Name}, ");
+                }
+
+                return $"SELECT {sb.ToString().Substring(0, sb.Length - 2)} FROM {_table} {_where};";
+            }
+        }
+
+        public string ReturnStatement
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                foreach (var obj in _objects)
+                { 
+                    sb.Append($"{obj.Key} as {obj.Name.Substring(0, obj.Name.IndexOf(':'))}, ");
+                }
+
+                return sb.ToString().Substring(0, sb.Length - 2);
+            }
+        }
+        
         public string TableName
         {
             get
