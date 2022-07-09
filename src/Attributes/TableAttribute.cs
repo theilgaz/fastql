@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fastql.Attributes
+namespace Fastql
 {
     public class TableAttribute : Attribute
     {

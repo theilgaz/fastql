@@ -1,4 +1,4 @@
-namespace Fastql.Utilities
+namespace Fastql
 {
     public enum DatabaseType
     {

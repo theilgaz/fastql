@@ -1,29 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Authors>Abdullah Ilgaz</Authors>
-    <Description>A small and fast library for building SQL queries from entity classes in a better way than regular string concatenation.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIcon>fastql-logo.png</PackageIcon>
-    <PackageIconUrl />
-    <RepositoryUrl>https://github.com/theilgaz/fastql/tree/main</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/theilgaz/fastql/tree/main</PackageProjectUrl>
-    <Copyright>Abdullah Ilgaz</Copyright>
-    <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.4.0</Version>
-    <PackageVersion>1.4.2.1</PackageVersion>
-    <AssemblyVersion>1.4.2.1</AssemblyVersion>
-    <FileVersion>1.4.2.1</FileVersion>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Authors>Abdullah Ilgaz</Authors>
+        <Description>A small and fast library for building SQL queries from entity classes in a better way than regular string concatenation.</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageIcon>fastql-logo.png</PackageIcon>
+        <PackageIconUrl />
+        <RepositoryUrl>https://github.com/theilgaz/fastql/tree/main</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/theilgaz/fastql/tree/main</PackageProjectUrl>
+        <Copyright>Abdullah Ilgaz</Copyright>
+        <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Version>1.4.0</Version>
+        <PackageVersion>2.0.1</PackageVersion>
+        <AssemblyVersion>2.0.1</AssemblyVersion>
+        <FileVersion>2.0.1</FileVersion>
+        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\resource\fastql-logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="..\resource\fastql-logo.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
 ﻿using System;
-using Fastql.Utilities;
 
-namespace Fastql.Attributes
+namespace Fastql
 {
     public class FieldAttribute : Attribute
     {

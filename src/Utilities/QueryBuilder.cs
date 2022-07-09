@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Fastql.Utilities
+namespace Fastql
 {
     public class QueryBuilder
     {

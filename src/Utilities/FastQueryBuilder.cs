@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace Fastql.Utilities
+namespace Fastql
 {
     public class FastQueryBuilder
     {
