@@ -97,7 +97,7 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return qb.InsertSql + $"RETURNING {qb.ReturnStatement}; ";
+                return qb.InsertSql + $" RETURNING {qb.ReturnStatement}; ";
             }
 
             return qb.InsertReturnObjectSql;
@@ -149,10 +149,10 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + " RETURNING ID; " : qb.InsertSql;
             }
 
-            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "; SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public string InsertStatement(bool returnIdentity = false)
@@ -184,10 +184,10 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + " RETURNING ID; " : qb.InsertSql;
             }
 
-            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "; SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public string UpdateQuery(TEntity entity, string where)
@@ -260,9 +260,25 @@ namespace Fastql
             return $"DELETE FROM {TableName()} WHERE {where};";
         }
 
+        
         public string SelectQuery(string where)
         {
-            return $"SELECT * FROM {TableName()} WHERE {where};";
+            FastQueryBuilder qb = new FastQueryBuilder(TableName(), " WHERE " + where);
+            TEntity entity = _entity;
+            PropertyInfo[] properties = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            foreach (PropertyInfo propertyInfo in properties)
+            {
+                if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
+                {
+                    FieldAttribute fieldAttribute = (FieldAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
+                    qb.Add(fieldAttribute.FieldName, propertyInfo.Name, "");
+                }
+                else
+                {
+                    qb.Add(propertyInfo.Name, propertyInfo.Name, "");
+                }
+            }
+            return qb.SelectSql;
         }
 
         /// <summary>

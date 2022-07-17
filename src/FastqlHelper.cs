@@ -100,7 +100,7 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return qb.InsertSql + $"RETURNING {qb.ReturnStatement}; ";
+                return qb.InsertSql + $" RETURNING {qb.ReturnStatement}; ";
             }
 
             return qb.InsertReturnObjectSql;
@@ -153,10 +153,10 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + " RETURNING ID; " : qb.InsertSql;
             }
 
-            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "; SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public static string InsertStatement(bool returnIdentity = false)
@@ -189,10 +189,10 @@ namespace Fastql
 
             if (_databaseType == DatabaseType.Postgres)
             {
-                return returnIdentity ? qb.InsertSql + "SELECT LASTVAL(); " : qb.InsertSql;
+                return returnIdentity ? qb.InsertSql + " RETURNING ID; " : qb.InsertSql;
             }
 
-            return returnIdentity ? qb.InsertSql + "SELECT SCOPE_IDENTITY();" : qb.InsertSql;
+            return returnIdentity ? qb.InsertSql + "; SELECT SCOPE_IDENTITY();" : qb.InsertSql;
         }
 
         public static string SelectQuery(string where)
