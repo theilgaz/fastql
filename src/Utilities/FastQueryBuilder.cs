@@ -113,12 +113,27 @@ namespace Fastql
         {
             get
             {
+                
+                if (_objects.Count == 0)
+                    throw new Exception("Input parameters not provided.");
+                
                 var sb = new StringBuilder();
-                foreach (var obj in _objects)
+                
+                if (!string.IsNullOrEmpty(_identityColumn))
                 {
-                    sb.Append($"{obj.Key} as {obj.Name.Substring(0, obj.Name.IndexOf(':'))}, ");
+                    sb.Append($"{_identityColumn}, ");
                 }
-
+                
+                foreach (var obj in _objects)
+                { 
+                    var name = obj.Name;
+                    var index = name.IndexOf(':');
+                    if (index >= 0)
+                        name = name.Substring(0, index);
+                    
+                    sb.Append($"{obj.Key} as {name}, ");
+                }
+                
                 return sb.ToString().Substring(0, sb.Length - 2);
             }
         }

@@ -13,9 +13,9 @@
         <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Version>1.4.0</Version>
-        <PackageVersion>2.0.1</PackageVersion>
-        <AssemblyVersion>2.0.1</AssemblyVersion>
-        <FileVersion>2.0.1</FileVersion>
+        <PackageVersion>2.1.2</PackageVersion>
+        <AssemblyVersion>2.1.2</AssemblyVersion>
+        <FileVersion>2.1.2</FileVersion>
         <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
