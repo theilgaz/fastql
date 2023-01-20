@@ -61,7 +61,8 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
-                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)))
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute)))
                 {
                     continue;
                 }
@@ -117,7 +118,8 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
-                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute))) continue;
 
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
@@ -169,7 +171,8 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotInsertableAttribute)) ||
-                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute))) continue;
 
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
@@ -198,7 +201,8 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
-                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute))) continue;
 
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
@@ -239,7 +243,8 @@ namespace Fastql
                 if (Attribute.IsDefined(propertyInfo, typeof(IsPrimaryKeyAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(PKAttribute)) ||
                     Attribute.IsDefined(propertyInfo, typeof(IsNotUpdatableAttribute)) ||
-                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute))) continue;
+                    Attribute.IsDefined(propertyInfo, typeof(SelectOnlyAttribute)) ||
+                    Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute))) continue;
 
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
