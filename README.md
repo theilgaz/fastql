@@ -30,7 +30,8 @@ A small and fast library for building SQL queries from entity classes in a bette
 |2.1.2 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsPrimaryKey Attribute](#isprimarykey-attribute)**  |
 |2.1.3 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotInsertable Attribute](#isnotinsertable-attribute)**  |
 |2.1.4 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotUpdatable Attribute](#isnotupdatable-attribute)**  |
-|2.1.4 |&nbsp; &nbsp; &nbsp; &nbsp; **[Field Attribute](#field-attribute)**  |
+|2.1.5 |&nbsp; &nbsp; &nbsp; &nbsp; **[Field Attribute](#field-attribute)**  |
+|2.1.6 |&nbsp; &nbsp; &nbsp; &nbsp; **[CustomField Attribute](#customfield-attribute)**  |
 |2.2   |&nbsp;&nbsp; **[APIs](#apis)**  |
 |||
 |3     |**[Dapper Example](#dapper-example)**  |
@@ -139,6 +140,16 @@ Fields have this attribute will be replaced in your Insert and Update query.
 ```
 [Field("created_at")]
 public DateTime CreatedAt { get; set; }
+```
+
+### CustomField Attribute
+
+Custom Fields have this attribute will be not included in your Select, Insert and Update queries.
+*You can define CustomField attribute like this:*
+
+```
+[CustomField]
+public string FullName => $"{FirstName} {LastName}";
 ```
 
 ## APIs
