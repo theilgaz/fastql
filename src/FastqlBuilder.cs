@@ -273,6 +273,7 @@ namespace Fastql
             PropertyInfo[] properties = entity.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
             foreach (PropertyInfo propertyInfo in properties)
             {
+                if (Attribute.IsDefined(propertyInfo, typeof(CustomFieldAttribute))) continue;
                 if (Attribute.IsDefined(propertyInfo, typeof(FieldAttribute)))
                 {
                     FieldAttribute fieldAttribute = (FieldAttribute)Attribute.GetCustomAttribute(propertyInfo, typeof(FieldAttribute));
