@@ -47,7 +47,7 @@ dotnet add package Fastql
 
 ### PackageReference
 ```xml
-<PackageReference Include="Fastql" Version="3.0.0" />
+<PackageReference Include="Fastql" Version="3.0.1" />
 ```
 
 ## Quick Start
