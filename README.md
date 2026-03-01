@@ -1,240 +1,456 @@
-  
- <div align="center"> 
-  
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/theilgaz/fastql/blob/master/LICENSE)  [![NuGet](https://img.shields.io/nuget/v/Fastql)](https://www.nuget.org/packages/Fastql/)   [![NuGet](https://img.shields.io/nuget/dt/Fastql)](https://www.nuget.org/packages/Fastql/) 
+<div align="center">
 
-   
-<img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-logo-resized.png?raw=true" style="width:250px"/><br>
-***Here comes the query!***
-   
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/theilgaz/fastql/blob/master/LICENSE)
+[![NuGet](https://img.shields.io/nuget/v/Fastql)](https://www.nuget.org/packages/Fastql/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Fastql)](https://www.nuget.org/packages/Fastql/)
+[![.NET](https://img.shields.io/badge/.NET-6.0%20|%207.0%20|%208.0%20|%209.0-purple)](https://dotnet.microsoft.com/)
+
+<img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-logo-resized.png?raw=true" width="250"/>
+
+# Fastql
+
+**A lightweight, high-performance SQL query builder for .NET**
+
+Generate type-safe CRUD queries from your entity classes. Perfect companion for Dapper and other micro-ORMs.
+
+[Installation](#installation) •
+[Quick Start](#quick-start) •
+[Attributes](#attributes) •
+[API Reference](#api-reference) •
+[Examples](#examples)
+
 </div>
 
+---
 
+## Features
 
-# Overview
-### What is the ⚡Fastql?
-A small and fast library for building SQL queries from entity classes in a better way than regular string concatenation.
+- **Zero Dependencies** - Pure .NET library with no external dependencies
+- **Multi-Database Support** - SQL Server, PostgreSQL, MySQL, SQLite, Oracle
+- **High Performance** - Built-in metadata caching for reflection optimization
+- **Type-Safe** - Generic constraints ensure compile-time safety
+- **Dapper-Ready** - Generates `@Parameter` syntax compatible with Dapper
+- **Nullable Support** - Full C# nullable reference types support
+- **Flexible API** - Choose between instance-based builder or static helper
 
-## Table of Contents
+## Installation
 
-|#     ||
-|------|---------------------------|
-|1     |&nbsp; **[Get Started](#get-started)**  |
-|1.1   |&nbsp; &nbsp; **[Install Package](#install-package)**  |
-|1.2   |&nbsp; &nbsp; **[Import the namespace](#import-the-namespace)**  |
-|1.3   |&nbsp; &nbsp; **[Sample Code](#sample-code)**  |
-|||
-|2     |**[How to use](#how-to-use)**  |
-|2.1   |&nbsp;&nbsp; **[Prepare your Entity](#prepare-your-entity)**  |
-|2.1.1 |&nbsp; &nbsp; &nbsp; &nbsp; **[Table Attribute](#table-attribute)**  |
-|2.1.2 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsPrimaryKey Attribute](#isprimarykey-attribute)**  |
-|2.1.3 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotInsertable Attribute](#isnotinsertable-attribute)**  |
-|2.1.4 |&nbsp; &nbsp; &nbsp; &nbsp; **[IsNotUpdatable Attribute](#isnotupdatable-attribute)**  |
-|2.1.5 |&nbsp; &nbsp; &nbsp; &nbsp; **[Field Attribute](#field-attribute)**  |
-|2.1.6 |&nbsp; &nbsp; &nbsp; &nbsp; **[CustomField Attribute](#customfield-attribute)**  |
-|2.2   |&nbsp;&nbsp; **[APIs](#apis)**  |
-|||
-|3     |**[Dapper Example](#dapper-example)**  |
-|3.1   |&nbsp; &nbsp; **[Crud Operations](#crud-operations)**  |
-|3.1.1 |&nbsp; &nbsp; &nbsp; &nbsp; **[Create (Insert)](#create-insert)**  |
-|3.1.1 |&nbsp; &nbsp; &nbsp; &nbsp; **[Read (Select)](#read-select)**  |
-|3.1.1 |&nbsp; &nbsp; &nbsp; &nbsp; **[Update](#update)**  |
-|3.1.1 |&nbsp; &nbsp; &nbsp; &nbsp; **[Delete](#delete)**  |
-
-
-## Get Started
-
-### Install Package
-
-⚡ Add package to your existing project from NuGet Package Manager. <br>
-⚡ Or download the source code from GitHub.
-
-### Import the namespace
-
-```
-using Fastsql;
+### Package Manager
+```bash
+Install-Package Fastql
 ```
 
-### Sample Code
-[Check out](https://github.com/theilgaz/fastql-unit-of-work-in-repository-pattern) the Fastql Sample Project with Unit of Work in Repository Pattern using Dapper.
-
-# How to use
-
-Fastql can be used with two way: using **object** and using **helper** class.
-
-## 1. Using FastqlBuilder Way
-
-Define a FastqlBuilder variable in your database related class. *TEntity* should be your poco to generate CRUD queries.
-
-⚡ This class fits perfect to Repository Pattern with Dapper Micro ORM.
-
-```
-   private FastqlBuilder<TEntity> fastql = new FastqlBuilder<TEntity>();
+### .NET CLI
+```bash
+dotnet add package Fastql
 ```
 
-## 2. Using FastqlHelper Way
-
-Call FastqlHelper with your *TEntity*. *TEntity* should be your poco to generate CRUD queries.
-
-⚡ This class fits perfect to Repository Pattern with Dapper Micro ORM.
-
-```
-   FastqlHelper<TEntity>.InsertQuery(); // insert query for TEntity
+### PackageReference
+```xml
+<PackageReference Include="Fastql" Version="3.0.0" />
 ```
 
+## Quick Start
 
-## Prepare Your Entity
+### 1. Define Your Entity
 
-Fastql has 5 attributes to handle your queries.
+```csharp
+using Fastql;
 
-### Table Attribute
+[Table("Customers", "Sales")]
+public class Customer
+{
+    [IsPrimaryKey]
+    public int Id { get; set; }
 
-Define your table and schema name. If you don't set your schema, it'll use *dbo* as default.
+    public string Name { get; set; }
 
-```
- [Table("Customer", "Sales")]
-    public class Customer
-    {
-```
-It will be rendered like **[Sales].[Customer]** for your query.
+    public string Email { get; set; }
 
-### IsPrimaryKey Attribute
-
-If your database table has PK and auto increment, you should define this attribute to your PK field. If your field has this key, your field won't be used in Insert or Update query.
-
-```
- [Table("Customer", "Sales")]
-    public class Customer
-    {
-        [IsPrimaryKey]
-        public int Id { get; set; }
-    }
+    [IsNotUpdatable]
+    public DateTime CreatedAt { get; set; }
+}
 ```
 
-### IsNotInsertable Attribute
+### 2. Generate Queries
 
-Fields have this attribute won't be placed in your Insert query.
-*You don't need to define this key for your PK field.*
+```csharp
+// Using FastqlBuilder (instance-based)
+var fastql = new FastqlBuilder<Customer>();
 
+string insertSql = fastql.InsertQuery();
+// INSERT INTO [Sales].[Customers] ([Name],[Email],[CreatedAt]) VALUES (@Name,@Email,@CreatedAt)
+
+string updateSql = fastql.UpdateQuery(customer, "Id = @Id");
+// UPDATE [Sales].[Customers] SET [Name]=@Name,[Email]=@Email WHERE Id = @Id
+
+string selectSql = fastql.SelectQuery("Id = @Id");
+// SELECT [Name],[Email],[CreatedAt] FROM [Sales].[Customers] WHERE Id = @Id
+
+string deleteSql = fastql.DeleteQuery("Id = @Id");
+// DELETE FROM [Sales].[Customers] WHERE Id = @Id
 ```
+
+```csharp
+// Using FastqlHelper (static)
+string insertSql = FastqlHelper<Customer>.InsertQuery();
+string updateSql = FastqlHelper<Customer>.UpdateQuery(customer, "Id = @Id");
+```
+
+---
+
+## Database Support
+
+Fastql supports multiple database engines with appropriate syntax:
+
+| Database | Identifier Style | Identity Return |
+|----------|------------------|-----------------|
+| **SQL Server** (default) | `[Schema].[Table]` | `SELECT SCOPE_IDENTITY()` |
+| **PostgreSQL** | `Schema.Table` | `RETURNING ID` |
+| **MySQL** | `Schema.Table` | - |
+| **SQLite** | `Schema.Table` | - |
+| **Oracle** | `Schema.Table` | - |
+
+### Setting Database Type
+
+```csharp
+// FastqlBuilder
+var fastql = new FastqlBuilder<Customer>(DatabaseType.Postgres);
+
+// FastqlHelper
+FastqlHelper<Customer>.SetDatabaseType(DatabaseType.Postgres);
+```
+
+---
+
+## Attributes
+
+Fastql uses attributes to control how your entities map to SQL queries.
+
+### Table Mapping
+
+#### `[Table]`
+Defines the table name and schema for your entity.
+
+```csharp
+[Table("Customers")]                    // Uses default schema "dbo"
+[Table("Customers", "Sales")]           // Explicit schema
+[Table("Customers", "Sales", OutputName.OnlyTable)]  // Output: Customers
+[Table("Customers", "Sales", OutputName.TableAndSchema)]  // Output: Sales.Customers
+```
+
+### Primary Key
+
+#### `[IsPrimaryKey]` or `[PK]`
+Marks the primary key column. Excluded from INSERT and UPDATE queries.
+
+```csharp
+[IsPrimaryKey]
+public int Id { get; set; }
+
+// Short form
+[PK]
+public int Id { get; set; }
+```
+
+### Column Control
+
+#### `[IsNotInsertable]`
+Excludes property from INSERT queries. Use for auto-generated or computed columns.
+
+```csharp
 [IsNotInsertable]
-public DateTime UpdatedOn { get; set; }
+public DateTime UpdatedAt { get; set; }  // Set by database trigger
 ```
 
+#### `[IsNotUpdatable]`
+Excludes property from UPDATE queries. Use for immutable fields.
 
-### IsNotUpdatable Attribute
-
-Fields have this attribute won't be placed in your Update query.
-*You don't need to define this key for your PK field.*
-
-```
+```csharp
 [IsNotUpdatable]
-public DateTime CreatedOn { get; set; }
+public DateTime CreatedAt { get; set; }  // Should never change
 ```
 
-### Field Attribute
+#### `[SelectOnly]`
+Excludes property from both INSERT and UPDATE queries. Included only in SELECT.
 
-Fields have this attribute will be replaced in your Insert and Update query.
-*You can define CreatedAt field on your code and your field attribute can contain the original version of database property like created_at.*
-
+```csharp
+[SelectOnly]
+public string ComputedColumn { get; set; }  // Database-computed value
 ```
+
+#### `[Ignore]`
+Completely excludes property from all query generation.
+
+```csharp
+[Ignore]
+public List<Order> Orders { get; set; }  // Navigation property
+
+[Ignore]
+public string DisplayName => $"{FirstName} {LastName}";  // Computed property
+```
+
+#### `[CustomField]`
+Alias for `[Ignore]`. Excludes property from all queries.
+
+```csharp
+[CustomField]
+public string FullAddress => $"{Street}, {City}, {Country}";
+```
+
+### Column Mapping
+
+#### `[Field]` or `[Column]`
+Maps a property to a differently-named database column.
+
+```csharp
 [Field("created_at")]
 public DateTime CreatedAt { get; set; }
+
+// With type cast (PostgreSQL)
+[Field("metadata", FieldType.Jsonb)]
+public string Metadata { get; set; }
+
+// Using Column attribute (EF Core familiar syntax)
+[Column("customer_name")]
+public string Name { get; set; }
 ```
 
-### CustomField Attribute
+### Validation Metadata
 
-Custom Fields have this attribute will be not included in your Select, Insert and Update queries.
-*You can define CustomField attribute like this:*
+#### `[Required]`
+Marks a property as required (metadata marker).
 
-```
-[CustomField]
-public string FullName => $"{FirstName} {LastName}";
-```
-
-## APIs
-
-⚡ TableName 
-⚡ InsertQuery 
-⚡ UpdateQuery 
-⚡ SelectQuery 
-⚡ DeleteQuery 
-
-
-
-# Dapper Example
-
-⚡Fastql is a great extension for Dapper Micro ORM. You can handle all of your CRUD operations easily with ⚡Fastql.
-
-## CRUD Operations
-
-### Create (Insert)
-
-*InsertQuery()* function returns you the insert query based on your decisions.
-
-```
-Connection.Execute(
-                fastql.InsertQuery(),
-                param: entity,
-                transaction: Transaction
-               );
+```csharp
+[Required]
+public string Email { get; set; }
 ```
 
-### Read (Select)
+#### `[MaxLength]`
+Specifies maximum string length (metadata marker).
 
-#### SelectQuery(where)
-*SelectQuery(where)* function returns you the select query based on your where condition.
-
-```
-Connection.Query<TEntity>(
-                  fastql.SelectQuery("Id=@Id"),
-                  param: new { Id = id },
-                  transaction: Transaction
-              );
+```csharp
+[MaxLength(100)]
+public string Name { get; set; }
 ```
 
-#### SelectQuery(columns,where,top)
+#### `[DefaultValue]`
+Specifies a default value (metadata marker).
 
-*SelectQuery(columns,where,top)* function returns you the select query based on desired columns, where conditions and top records.
+```csharp
+[DefaultValue(true)]
+public bool IsActive { get; set; }
 ```
-Connection.Query<TEntity>(
-                  fastql.SelectQuery(new string[] {"Field1","Field2","Field3"},"Id=@Id"),
-                  param: new { Id = id },
-                  transaction: Transaction
-              );
-```
-**Sample output**: Select TOP(1000) [Field1],[Field2],[Field3] from [TableName] where Id=@Id
 
-```
-Connection.Query<TEntity>(
-                  fastql.SelectQuery(new string[] {"Field1","Field2","Field3"},"Id=@Id",500),
-                  param: new { Id = id },
-                  transaction: Transaction
-              );
-```
-**Sample output**: Select TOP(500) [Field1],[Field2],[Field3] from [TableName] where Id=@Id
+---
 
-### Update
+## PostgreSQL Field Types
 
-*UpdateQuery(TEntity,string)* returns you the update query with parameter tags added. You can bind your **entity** to query as parameter. Where string can include data or you can set your param tag to use it. *(For.ex.) "Id=@Id" or $"Id={id}"*
+When using PostgreSQL, you can specify type casts for proper data handling:
 
+```csharp
+[Field("metadata", FieldType.Jsonb)]      // ::jsonb cast
+public string Metadata { get; set; }
+
+[Field("created_at", FieldType.Timestamp)] // ::timestamp cast
+public DateTime CreatedAt { get; set; }
+
+[Field("birth_date", FieldType.Date)]      // ::date cast
+public DateTime BirthDate { get; set; }
+
+[Field("start_time", FieldType.Time)]      // ::time cast
+public TimeSpan StartTime { get; set; }
 ```
-Connection.Execute(
-                  fastql.UpdateQuery(entity, where),
-                  param: entity,
-                  transaction: Transaction
-              );
-```
- 
 
-### Delete
-*DeleteQuery(where)* function returns you the delete query based on your where condition.
+**Available FieldTypes:** `Initial`, `String`, `Int`, `Float`, `DateTime`, `Bool`, `Enum`, `Object`, `Jsonb`, `Timestamp`, `Date`, `Time`
 
+---
+
+## API Reference
+
+### FastqlBuilder&lt;TEntity&gt;
+
+Instance-based query builder with constructor injection support.
+
+| Method | Description |
+|--------|-------------|
+| `TableName()` | Returns the formatted table name |
+| `InsertQuery(returnIdentity)` | Generates INSERT query with `@Parameter` syntax |
+| `InsertStatement(returnIdentity)` | Generates INSERT query with `:Parameter` syntax |
+| `InsertReturnObjectQuery()` | INSERT query that returns the inserted row |
+| `UpdateQuery(entity, where)` | Generates UPDATE query with values from entity |
+| `UpdateStatement(entity, where)` | UPDATE query with `:Parameter` syntax |
+| `SelectQuery(where)` | Generates SELECT query for all columns |
+| `SelectQuery(columns, where, top)` | SELECT with specific columns and TOP limit |
+| `DeleteQuery(where)` | Generates DELETE query |
+
+### FastqlHelper&lt;TEntity&gt;
+
+Static helper class for quick, one-off query generation.
+
+```csharp
+// Set database type globally for all entities
+FastqlHelper<Customer>.SetDatabaseType(DatabaseType.Postgres);
+
+// All the same methods as FastqlBuilder
+FastqlHelper<Customer>.InsertQuery();
+FastqlHelper<Customer>.UpdateQuery(entity, "Id = @Id");
+FastqlHelper<Customer>.SelectQuery("IsActive = @IsActive");
+FastqlHelper<Customer>.DeleteQuery("Id = @Id");
 ```
-Connection.Execute(
-                  fastql.DeleteQuery(where),
-                  // param: entity,
-                  transaction: Transaction
-              );
-```                
-                
+
+---
+
+## Examples
+
+### Complete Entity Definition
+
+```csharp
+using Fastql;
+
+[Table("Products", "Inventory")]
+public class Product
+{
+    [PK]
+    public int Id { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public string Name { get; set; }
+
+    [Column("description_text")]
+    public string Description { get; set; }
+
+    public decimal Price { get; set; }
+
+    [DefaultValue(0)]
+    public int StockQuantity { get; set; }
+
+    [IsNotUpdatable]
+    public DateTime CreatedAt { get; set; }
+
+    [IsNotInsertable]
+    public DateTime? UpdatedAt { get; set; }
+
+    [SelectOnly]
+    public decimal CalculatedDiscount { get; set; }
+
+    [Ignore]
+    public Category Category { get; set; }
+
+    [CustomField]
+    public string DisplayPrice => $"${Price:F2}";
+}
+```
+
+### Dapper Integration
+
+```csharp
+public class ProductRepository
+{
+    private readonly IDbConnection _connection;
+    private readonly FastqlBuilder<Product> _fastql;
+
+    public ProductRepository(IDbConnection connection)
+    {
+        _connection = connection;
+        _fastql = new FastqlBuilder<Product>();
+    }
+
+    // CREATE
+    public async Task<int> CreateAsync(Product product)
+    {
+        var sql = _fastql.InsertQuery(returnIdentity: true);
+        return await _connection.ExecuteScalarAsync<int>(sql, product);
+    }
+
+    // READ
+    public async Task<Product?> GetByIdAsync(int id)
+    {
+        var sql = _fastql.SelectQuery("Id = @Id");
+        return await _connection.QueryFirstOrDefaultAsync<Product>(sql, new { Id = id });
+    }
+
+    public async Task<IEnumerable<Product>> GetActiveAsync()
+    {
+        var sql = _fastql.SelectQuery("StockQuantity > @MinStock");
+        return await _connection.QueryAsync<Product>(sql, new { MinStock = 0 });
+    }
+
+    // UPDATE
+    public async Task<bool> UpdateAsync(Product product)
+    {
+        var sql = _fastql.UpdateQuery(product, "Id = @Id");
+        var affected = await _connection.ExecuteAsync(sql, product);
+        return affected > 0;
+    }
+
+    // DELETE
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var sql = _fastql.DeleteQuery("Id = @Id");
+        var affected = await _connection.ExecuteAsync(sql, new { Id = id });
+        return affected > 0;
+    }
+}
+```
+
+### PostgreSQL with JSONB
+
+```csharp
+[Table("events", "public")]
+public class Event
+{
+    [PK]
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+
+    [Field("event_data", FieldType.Jsonb)]
+    public string EventData { get; set; }
+
+    [Field("created_at", FieldType.Timestamp)]
+    public DateTime CreatedAt { get; set; }
+}
+
+// Usage
+var fastql = new FastqlBuilder<Event>(DatabaseType.Postgres);
+var insertSql = fastql.InsertQuery(returnIdentity: true);
+// INSERT INTO public.events (Name,event_data,created_at)
+// VALUES (@Name,@EventData::jsonb,@CreatedAt::timestamp) RETURNING ID;
+```
+
+### Repository Pattern with Unit of Work
+
+For a complete example using Fastql with Repository Pattern and Unit of Work, check out the [sample project](https://github.com/theilgaz/fastql-unit-of-work-in-repository-pattern).
+
+---
+
+## Migration from v2.x to v3.0
+
+### Breaking Changes
+
+1. **Generic Constraint Added**: `FastqlBuilder<TEntity>` and `FastqlHelper<TEntity>` now require `where TEntity : class, new()`
+
+2. **Nullable Reference Types**: The library now uses nullable reference types. Update your entity properties accordingly.
+
+### New Features in v3.0
+
+- Multi-target framework support (.NET 6, 7, 8, 9)
+- New attributes: `[Column]`, `[Ignore]`, `[Required]`, `[MaxLength]`, `[DefaultValue]`
+- Additional database types: MySQL, SQLite, Oracle
+- Performance improvements with metadata caching
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Author
+
+**Abdullah Ilgaz** - [GitHub](https://github.com/theilgaz)
