@@ -12,11 +12,13 @@
         <Copyright>Abdullah Ilgaz</Copyright>
         <PackageTags>sql,query,builder,string query,dapper,orm,generate,script,insert,update,select,delete,string crud,query build,concat,string,value,sql,sqlserver,micro orm</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>2.4.0</Version>
-        <PackageVersion>2.4.0</PackageVersion>
-        <AssemblyVersion>2.4.0</AssemblyVersion>
-        <FileVersion>2.4.0</FileVersion>
-        <TargetFrameworks>net6.0</TargetFrameworks>
+        <Version>3.0.0</Version>
+        <PackageVersion>3.0.0</PackageVersion>
+        <AssemblyVersion>3.0.0</AssemblyVersion>
+        <FileVersion>3.0.0</FileVersion>
+        <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
