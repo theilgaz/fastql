@@ -10,11 +10,11 @@ namespace Fastql
         private readonly Dictionary<string, object> _params = new Dictionary<string, object>();
 
         private readonly string _table;
-        private readonly string _where;
+        private readonly string? _where;
 
         private string _identityColumn = "";
 
-        public QueryBuilder(string table, string where = null)
+        public QueryBuilder(string table, string? where = null)
         {
             _table = table;
             _where = where;

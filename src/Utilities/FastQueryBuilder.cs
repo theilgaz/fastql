@@ -11,11 +11,11 @@ namespace Fastql
         private readonly List<QueryBuilderObject> _objects = new List<QueryBuilderObject>();
 
         private readonly string _table;
-        private readonly string _where;
+        private readonly string? _where;
 
         private string _identityColumn = "";
 
-        public FastQueryBuilder(string table, string where = null)
+        public FastQueryBuilder(string table, string? where = null)
         {
             _table = table;
             _where = where;
@@ -26,7 +26,7 @@ namespace Fastql
             _identityColumn = identity;
         }
 
-        public void Add(string key, string name, object value)
+        public void Add(string key, string name, object? value)
         {
             var obj = new QueryBuilderObject(key, name, value);
             if (_objects.Contains(obj))
@@ -35,7 +35,7 @@ namespace Fastql
             _objects.Add(obj);
         }
 
-        public void AddCondition(string parameterName, string name, object value)
+        public void AddCondition(string parameterName, string name, object? value)
         {
             var obj = new QueryBuilderObject(parameterName, name, value);
 
