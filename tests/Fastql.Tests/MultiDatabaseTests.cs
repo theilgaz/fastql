@@ -38,14 +38,14 @@ public class MultiDatabaseTests
     }
 
     [Fact]
-    public void InsertQuery_Oracle_NoReturnClause()
+    public void InsertQuery_Oracle_ReturnsWithReturningInto()
     {
         var builder = new FastqlBuilder<Customer>(DatabaseType.Oracle);
         var query = builder.InsertQuery(returnIdentity: true);
 
-        // Oracle uses RETURNING INTO with bind variables, which is different syntax
         Assert.DoesNotContain("SELECT", query);
-        Assert.DoesNotContain("RETURNING", query);
+        Assert.Contains("RETURNING", query);
+        Assert.Contains("INTO :", query);
     }
 
     [Fact]

@@ -84,7 +84,7 @@ public class BackwardCompatibilityTests
         var builder = new FastqlBuilder<Customer>(DatabaseType.Postgres);
         var query = builder.InsertQuery(returnIdentity: true);
 
-        Assert.Contains("RETURNING ID", query);
+        Assert.Contains("RETURNING Id", query);
     }
 
     [Fact]

@@ -86,3 +86,34 @@ public class PostgresLog
     [Field("created_at", FieldType.Timestamp)]
     public DateTime CreatedAt { get; set; }
 }
+
+// Entity without [Table] attribute - uses class name as table
+public class ImplicitTableEntity
+{
+    [PK]
+    public int Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+}
+
+// Entity without a primary key
+[Table("NoPkItems", "dbo")]
+public class NoPrimaryKeyEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+}
+
+// Entity where all non-PK properties are excluded
+[Table("AllExcluded", "dbo")]
+public class AllExcludedEntity
+{
+    [PK]
+    public int Id { get; set; }
+
+    [Ignore]
+    public string Ignored { get; set; } = string.Empty;
+
+    [CustomField]
+    public string Computed => "computed";
+}
