@@ -1,6 +1,7 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Fastql.Core;
+using Fastql.Validation;
 
 namespace Fastql
 {
@@ -14,18 +15,20 @@ namespace Fastql
             set => _databaseType = value;
         }
 
+        [Obsolete("Use the DatabaseType property instead.")]
         public static DatabaseType SetDatabaseType(DatabaseType databaseType)
         {
             _databaseType = databaseType;
             return _databaseType;
         }
 
+        [Obsolete("Use the DatabaseType property instead.")]
         public static DatabaseType GetDatabaseType()
         {
             return _databaseType;
         }
 
-        static string TableName()
+        public static string TableName()
         {
             return QueryGenerator.GenerateTableName<TEntity>();
         }
@@ -49,16 +52,12 @@ namespace Fastql
 
         public static string SelectQuery(string where)
         {
-            return $"SELECT * FROM {TableName()} WHERE {where};";
+            return QueryGenerator.GenerateSelectQuery<TEntity>(where);
         }
 
         public static string SelectQuery(string[] columns, string where, int top = 1000)
         {
-            var tableName = TableName();
-            var s = $"[{string.Join("],[", columns.Select(i => i.Replace("[", "")))}]";
-            return columns is { Length: > 0 }
-                ? $"SELECT TOP({top}) {string.Join(",", s)} FROM {tableName} WHERE {where};"
-                : $"SELECT TOP({top}) * FROM {tableName} WHERE {where};";
+            return QueryGenerator.GenerateSelectQueryWithColumns<TEntity>(columns, where, top, _databaseType);
         }
 
         public static string UpdateQuery(TEntity entity, string where)
@@ -74,6 +73,26 @@ namespace Fastql
         public static string DeleteQuery(string where)
         {
             return QueryGenerator.GenerateDeleteQuery<TEntity>(where);
+        }
+
+        public static ValidationResult Validate(TEntity entity)
+        {
+            return EntityValidator.Validate(entity);
+        }
+
+        public static string BulkInsertQuery(IReadOnlyList<TEntity> entities)
+        {
+            return BulkQueryGenerator.BulkInsertQuery(entities, _databaseType);
+        }
+
+        public static string BulkUpdateQuery(IReadOnlyList<TEntity> entities)
+        {
+            return BulkQueryGenerator.BulkUpdateQuery(entities, _databaseType);
+        }
+
+        public static string UpsertQuery()
+        {
+            return UpsertQueryGenerator.UpsertQuery<TEntity>(_databaseType);
         }
     }
 }

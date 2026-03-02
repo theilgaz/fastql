@@ -32,14 +32,15 @@ public class CachingTests
     [Fact]
     public void TypeMetadataCache_Remove_RemovesSpecificType()
     {
-        TypeMetadataCache.Clear();
+        // Ensure both types are cached
         TypeMetadataCache.GetOrCreate<Customer>();
         TypeMetadataCache.GetOrCreate<Product>();
 
+        var countBefore = TypeMetadataCache.Count;
         var removed = TypeMetadataCache.Remove<Customer>();
 
         Assert.True(removed);
-        Assert.Equal(1, TypeMetadataCache.Count);
+        Assert.Equal(countBefore - 1, TypeMetadataCache.Count);
     }
 
     [Fact]

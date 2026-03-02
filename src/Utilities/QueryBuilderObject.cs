@@ -1,3 +1,5 @@
+using System;
+
 namespace Fastql
 {
     public class QueryBuilderObject
@@ -15,6 +17,17 @@ namespace Fastql
             Key = key;
             Name = name;
             Value = value;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is QueryBuilderObject other &&
+                   string.Equals(Key, other.Key, StringComparison.Ordinal);
+        }
+
+        public override int GetHashCode()
+        {
+            return StringComparer.Ordinal.GetHashCode(Key);
         }
     }
 }

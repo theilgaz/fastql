@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using Fastql.Caching;
 
@@ -53,7 +54,7 @@ namespace Fastql.Core
                 return qb.InsertReturnObjectSql;
             }
 
-            return AppendIdentityReturn(qb.InsertSql, dbType, returnIdentity);
+            return AppendIdentityReturn(qb.InsertSql, dbType, returnIdentity, metadata.PrimaryKeyProperty?.ColumnName);
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace Fastql.Core
                 qb.Add(prop.ColumnName, prop.PropertyName, $":{prop.PropertyName}");
             }
 
-            return AppendIdentityReturn(qb.InsertSql, dbType, returnIdentity);
+            return AppendIdentityReturn(qb.InsertSql, dbType, returnIdentity, metadata.PrimaryKeyProperty?.ColumnName);
         }
 
         /// <summary>
@@ -139,6 +140,38 @@ namespace Fastql.Core
         }
 
         /// <summary>
+        /// Generates a SELECT query with specific columns, where clause, and top/limit.
+        /// </summary>
+        public static string GenerateSelectQueryWithColumns<TEntity>(
+            string[] columns,
+            string where,
+            int top,
+            DatabaseType dbType) where TEntity : class
+        {
+            var metadata = TypeMetadataCache.GetOrCreate<TEntity>();
+            var tableName = metadata.GetFormattedTableName();
+
+            string columnList;
+            if (columns is { Length: > 0 })
+            {
+                columnList = dbType == DatabaseType.SqlServer
+                    ? $"[{string.Join("],[", columns.Select(i => i.Replace("[", "").Replace("]", "")))}]"
+                    : string.Join(", ", columns);
+            }
+            else
+            {
+                columnList = "*";
+            }
+
+            return dbType switch
+            {
+                DatabaseType.SqlServer => $"SELECT TOP({top}) {columnList} FROM {tableName} WHERE {where};",
+                DatabaseType.Oracle => $"SELECT {columnList} FROM {tableName} WHERE {where} FETCH FIRST {top} ROWS ONLY;",
+                _ => $"SELECT {columnList} FROM {tableName} WHERE {where} LIMIT {top};" // Postgres, MySQL, SQLite
+            };
+        }
+
+        /// <summary>
         /// Generates a DELETE query.
         /// </summary>
         public static string GenerateDeleteQuery<TEntity>(string where) where TEntity : class
@@ -151,17 +184,19 @@ namespace Fastql.Core
         /// <summary>
         /// Appends the identity return clause based on database type.
         /// </summary>
-        private static string AppendIdentityReturn(string sql, DatabaseType dbType, bool returnIdentity)
+        private static string AppendIdentityReturn(string sql, DatabaseType dbType, bool returnIdentity, string? primaryKeyColumn = null)
         {
             if (!returnIdentity)
                 return sql;
 
+            var pk = primaryKeyColumn ?? "id";
+
             return dbType switch
             {
-                DatabaseType.Postgres => sql + " RETURNING ID; ",
+                DatabaseType.Postgres => sql + $" RETURNING {pk}; ",
                 DatabaseType.MySql => sql + "; SELECT LAST_INSERT_ID();",
                 DatabaseType.SQLite => sql + "; SELECT last_insert_rowid();",
-                DatabaseType.Oracle => sql, // Oracle uses RETURNING INTO with bind variables
+                DatabaseType.Oracle => sql + $" RETURNING {pk} INTO :{pk}",
                 _ => sql + "; SELECT SCOPE_IDENTITY();" // SqlServer default
             };
         }

@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Text;
+using Fastql.Exceptions;
 
 namespace Fastql
 {
@@ -30,17 +29,9 @@ namespace Fastql
         {
             var obj = new QueryBuilderObject(key, name, value);
             if (_objects.Contains(obj))
-                throw new DuplicateNameException("This field was already declared");
+                throw new DuplicateFieldException(key);
 
             _objects.Add(obj);
-        }
-
-        public void AddCondition(string parameterName, string name, object? value)
-        {
-            var obj = new QueryBuilderObject(parameterName, name, value);
-
-            if (_objects.Contains(obj))
-                throw new DuplicateNameException("This field was already declared");
         }
 
         public string InsertSql
@@ -48,7 +39,7 @@ namespace Fastql
             get
             {
                 if (_objects.Count == 0)
-                    throw new Exception("Input parameters not provided.");
+                    throw new MissingParametersException();
 
                 var fields = string.Join(", ", _objects.Select(x => x.Key));
                 var values = string.Join(", @", _objects.Select(x => x.Name));
@@ -61,11 +52,11 @@ namespace Fastql
             get
             {
                 if (_objects.Count == 0)
-                    throw new Exception("Input parameters not provided.");
+                    throw new MissingParametersException();
 
                 var fields = string.Join(", ", _objects.Select(x => x.Key));
                 var values = string.Join(", @", _objects.Select(x => x.Name));
-                return $"INSERT INTO {_table}({fields}) OUTPUT inserted . * VALUES(@{values});";
+                return $"INSERT INTO {_table}({fields}) OUTPUT inserted.* VALUES(@{values});";
             }
         }
 
@@ -74,18 +65,13 @@ namespace Fastql
             get
             {
                 if (string.IsNullOrEmpty(_where))
-                    throw new Exception("Where clause not provided.");
+                    throw new MissingWhereClauseException();
 
                 if (_objects.Count == 0)
-                    throw new Exception("Input parameters not provided.");
+                    throw new MissingParametersException();
 
-                var sb = new StringBuilder();
-                foreach (var obj in _objects)
-                {
-                    sb.Append($"{obj.Key} = @{obj.Name}, ");
-                }
-
-                return $"UPDATE {_table} SET {sb.ToString().Substring(0, sb.Length - 2)} {_where};";
+                var setClauses = string.Join(", ", _objects.Select(obj => $"{obj.Key} = @{obj.Name}"));
+                return $"UPDATE {_table} SET {setClauses} {_where};";
             }
         }
 
@@ -94,18 +80,13 @@ namespace Fastql
             get
             {
                 if (string.IsNullOrEmpty(_where))
-                    throw new Exception("Where clause not provided.");
+                    throw new MissingWhereClauseException();
 
                 if (_objects.Count == 0)
-                    throw new Exception("Input parameters not provided.");
+                    throw new MissingParametersException();
 
-                var sb = new StringBuilder();
-                foreach (var obj in _objects)
-                {
-                    sb.Append($"{obj.Key} as {obj.Name}, ");
-                }
-
-                return $"SELECT {sb.ToString().Substring(0, sb.Length - 2)} FROM {_table} {_where};";
+                var columnList = string.Join(", ", _objects.Select(obj => $"{obj.Key} as {obj.Name}"));
+                return $"SELECT {columnList} FROM {_table} {_where};";
             }
         }
 
@@ -113,28 +94,27 @@ namespace Fastql
         {
             get
             {
-                
                 if (_objects.Count == 0)
-                    throw new Exception("Input parameters not provided.");
-                
-                var sb = new StringBuilder();
-                
+                    throw new MissingParametersException();
+
+                var parts = new List<string>();
+
                 if (!string.IsNullOrEmpty(_identityColumn))
                 {
-                    sb.Append($"{_identityColumn}, ");
+                    parts.Add(_identityColumn);
                 }
-                
+
                 foreach (var obj in _objects)
-                { 
+                {
                     var name = obj.Name;
                     var index = name.IndexOf(':');
                     if (index >= 0)
                         name = name.Substring(0, index);
-                    
-                    sb.Append($"{obj.Key} as {name}, ");
+
+                    parts.Add($"{obj.Key} as {name}");
                 }
-                
-                return sb.ToString().Substring(0, sb.Length - 2);
+
+                return string.Join(", ", parts);
             }
         }
 
