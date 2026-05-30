@@ -5,7 +5,7 @@
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Fastql)](https://www.nuget.org/packages/Fastql/)
 [![.NET](https://img.shields.io/badge/.NET-6.0%20|%207.0%20|%208.0%20|%209.0-purple)](https://dotnet.microsoft.com/)
 
-<img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-logo-resized.png?raw=true" width="250"/>
+<img src="https://github.com/theilgaz/fastql/blob/main/resource/fastql-logo-resized.png?raw=true" width="400"/>
 
 # Fastql
 
